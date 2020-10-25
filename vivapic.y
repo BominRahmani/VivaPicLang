@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include "vivapic.h"
 void yyerror(const char* msg);
-setup(); //this calls in the setup from header
 int yylex();
 %}
 
@@ -30,6 +29,7 @@ int yylex();
 %%
 statement_list: statement end
               | statement statement_list
+	{setup();}
 ;
 
 statement: vector | color_change | point | circle | block
