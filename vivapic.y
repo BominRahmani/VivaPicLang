@@ -7,7 +7,7 @@ int yylex();
 %}
 
 %define parse.error verbose
-%start color_change | vector | point | circle | block
+%start color_change
 
 %union{
     int i;
@@ -31,6 +31,14 @@ int yylex();
 
 POINT: INT INT
      | FLOAT FLOAT
+        {
+        if($1 < 0 || $2 < 0 || $1 >= 512 || $2 >= 384){
+     printf("Invalid input");
+     }
+     else{
+     point($1,$2);
+     }
+  }
 ;
 VECTOR: INT INT INT INT 
     {vector($1,$2,$3,$4);}
@@ -42,10 +50,18 @@ BLOCK: INT INT INT INT
      {block($1,$2,$3,$4);}
 ;
 COLOR_CHANGE: INT INT INT
-    {color_change($1,$2,$3);}
+    {//check for validity of ints
+    if($1 < 0 || $2 < 0 || $3 < 0 || $1 >= 256 || $2 >= 256 || $3 >= 256){
+    printf("Invalid input");
+    }
+    else{
+    color_change($1,$2,$3);
+    }
+    
+    }
 ;
-END_STATEMENT: END
-;
+END : 
+    { finish(); }
 %%
 
 int main(int argc, char** argv){
