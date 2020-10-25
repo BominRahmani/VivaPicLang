@@ -7,7 +7,7 @@ int yylex();
 %}
 
 %define parse.error verbose
-%start color_change
+%start statement_list
 
 %union{
     int i;
@@ -28,40 +28,54 @@ int yylex();
 %type<f> FLOAT
 
 %%
+statement_list: statement end
+              | statement statement_list
+;
 
-POINT: INT INT
-     | FLOAT FLOAT
-        {
-        if($1 < 0 || $2 < 0 || $1 >= 512 || $2 >= 384){
+statement: vector | color_change | point | circle | block
+;
+
+circle: CIRCLE INT INT INT end_statement
+        {circle($2,$3,$4);}
+;
+
+vector: VECTOR INT INT INT INT end_statement
+        {vector($2,$3,$4,$5);}
+;
+
+color_change: COLOR_CHANGE INT INT INT end_statement
+        {//check for validity of ints
+     if($2 < 0 || $3 < 0 || $4 < 0 || $2 >= 256 || $3 >= 256 || $4 >= 256){
      printf("Invalid input");
      }
      else{
-     point($1,$2);
+     color_change($2,$3,$4);
      }
-  }
-;
-VECTOR: INT INT INT INT 
-    {vector($1,$2,$3,$4);}
-;
-CIRCLE: INT INT INT
-    {circle($1,$2,$3);}
-;
-BLOCK: INT INT INT INT
-     {block($1,$2,$3,$4);}
-;
-COLOR_CHANGE: INT INT INT
-    {//check for validity of ints
-    if($1 < 0 || $2 < 0 || $3 < 0 || $1 >= 256 || $2 >= 256 || $3 >= 256){
-    printf("Invalid input");
-    }
-    else{
-    color_change($1,$2,$3);
-    }
-    
     }
 ;
-END : 
-    { finish(); }
+
+point: POINT INT INT end_statement
+    {
+         if($2 < 0 || $3 < 0 || $2 >= 512 || $3 >= 384){
+      printf("Invalid input");
+      }
+      else{
+      point($2,$3);
+      }
+   }
+
+;
+
+block: BLOCK INT INT INT INT end_statement
+    {block($2,$3,$4,$5);}
+;
+
+end_statement: END_STATEMENT
+;
+
+end: END
+   {finish();}
+;
 %%
 
 int main(int argc, char** argv){
